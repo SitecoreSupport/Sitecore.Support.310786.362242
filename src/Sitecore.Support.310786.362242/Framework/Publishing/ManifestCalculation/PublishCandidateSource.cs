@@ -454,12 +454,30 @@ namespace Sitecore.Support.Framework.Publishing.ManifestCalculation
                                                           PublishingConstants.WorkflowFields.WorkflowState,
                                                           null);
 
-                        if (!nextVarianceWorkflowState.HasValue || _publishableStates.ContainsKey(nextVarianceWorkflowState.Value))
+                        #region Added code
+                        bool validToPublish = true;
+                        var validToDate = ParseSitecoreDateField(nextVariance.Value,
+                                                                         PublishingConstants.PublishingFields.Versioned.ValidTo,
+                                                                         MaxUtc);
+                        var validFromDate = ParseSitecoreDateField(
+                                nextVariance.Value,
+                                PublishingConstants.PublishingFields.Versioned.ValidFrom,
+                                MinUtc);
+                        if ((validFromDate <= validToDate && validToDate < DateTime.UtcNow) ||
+                                    (validFromDate > DateTime.UtcNow && validToDate < validFromDate))
+                        {
+                            validToPublish = false;
+                        }
+                        #endregion
+
+                        #region Modified code
+                        if (validToPublish && (!nextVarianceWorkflowState.HasValue || _publishableStates.ContainsKey(nextVarianceWorkflowState.Value)))
                         {
                             validTo = ParseSitecoreDateField(nextVariance.Value,
                                                              PublishingConstants.PublishingFields.Versioned.ValidFrom,
                                                              MaxUtc);
                         }
+                        #endregion
 
                         if (VarianceOverriddenByNewerVariance(nextVariances, validFrom) && validTo != MaxUtc)
                         {
