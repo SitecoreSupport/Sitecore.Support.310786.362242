@@ -124,7 +124,8 @@ namespace Sitecore.Support.Framework.Publishing.ManifestCalculation.TargetProduc
                         // emit invalid for the clone variants that are invalid
                         if (validCandidates.Any())
                         {
-                            var allSourceVariantsToDelete = validCandidates.SelectMany(x => x.AsValid().VariantsToDelete).ToArray();
+                            // Make sure all valid candidates are distinct before turining collection into a dictionary
+                            var allSourceVariantsToDelete = validCandidates.SelectMany(x => x.AsValid().VariantsToDelete).Distinct().ToArray();
 
                             var relatedCloneVariants = _itemRelationshipRepository.GetInRelationships(_sourceName, allSourceVariantsToDelete,
                                 new HashSet<ItemRelationshipType>()
